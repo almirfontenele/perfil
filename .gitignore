@@ -1,0 +1,7 @@
+.claude/
+.claude.json
+.clovis/
+.gemini/
+.motd_shown
+.npmrc
+.DS_Store

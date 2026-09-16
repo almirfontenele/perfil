@@ -1,0 +1,83 @@
+openapi: 3.0.3
+info:
+  title: Transcrição de Áudio
+  version: 0.1.0
+  description: >
+    API HTTP para envio de um áudio e recebimento da sua transcrição em
+    português (pt-BR), de forma síncrona: a resposta de cada endpoint devolve
+    o texto transcrito diretamente na mesma chamada, sem persistência de áudio
+    ou de transcrição.
+paths:
+  /transcricoes:
+    post:
+      summary: Envia um áudio para transcrição
+      description: >
+        Recebe o upload de um arquivo de áudio, valida formato (WAV, MP3,
+        M4A, OGG ou FLAC) e duração (até 10 minutos) e, se aceito, encaminha
+        o áudio ao motor de transcrição local e devolve o texto transcrito
+        na mesma resposta. A transcrição é feita exclusivamente para
+        português (pt-BR); áudio sem fala perceptível (silêncio), dominado
+        por ruído ou com idioma detectado diferente de português é
+        rejeitado sem produzir texto.
+      operationId: enviarAudio
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                arquivo:
+                  type: string
+                  format: binary
+                  description: Arquivo de áudio a transcrever.
+              required:
+                - arquivo
+      responses:
+        "200":
+          description: Transcrição concluída com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranscricaoResponse"
+        "400":
+          description: Formato de áudio não suportado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErroValidacao"
+        "422":
+          description: >
+            Áudio bem formado mas rejeitado por regra de negócio: duração
+            acima do limite de 10 minutos, idioma detectado diferente de
+            português, áudio sem fala perceptível (silêncio) ou áudio
+            dominado por ruído sem fala identificável. O texto de `detail`
+            distingue qual dessas causas ocorreu.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErroValidacao"
+        "500":
+          description: Falha interna do motor de transcrição durante a inferência.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErroValidacao"
+components:
+  schemas:
+    TranscricaoResponse:
+      type: object
+      properties:
+        texto_transcrito:
+          type: string
+          description: Texto transcrito do áudio enviado, em português (pt-BR).
+      required:
+        - texto_transcrito
+    ErroValidacao:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Motivo da rejeição do áudio enviado.
+      required:
+        - detail

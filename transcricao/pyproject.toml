@@ -1,0 +1,27 @@
+[project]
+name = "transcricao"
+version = "0.1.0"
+description = "App de transcrição de áudio em português (pt-BR) via Whisper local"
+requires-python = ">=3.10"
+dependencies = [
+    "mutagen",
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
+    "openai-whisper",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "openapi-spec-validator",
+    "pyyaml",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
